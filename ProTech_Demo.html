@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protech</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyber-blue: #00f0ff;
+            --cyber-purple: #b000ff;
+            --cyber-pink: #ff00ff;
+            --neon-green: #00ff88;
+            --bg-dark: #0a0a0f;
+            --bg-darker: #050508;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.15);
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a0f2e 50%, #0f1a2e 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .font-display {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Animated background */
+        .animated-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--cyber-blue);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: var(--cyber-purple);
+            bottom: -150px;
+            left: -150px;
+            animation-delay: 7s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: var(--cyber-pink);
+            top: 50%;
+            left: 50%;
+            animation-delay: 14s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -50px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.9); }
+        }
+
+        /* Glass effect */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Neon glow */
+        .glow-blue {
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(176, 0, 255, 0.5);
+        }
+
+        .glow-pink {
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        }
+
+        .glow-green {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        /* Scan line effect */
+        .scan-line {
+            position: fixed;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyber-blue), transparent);
+            animation: scan 8s linear infinite;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.3;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-darker);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--cyber-blue), var(--cyber-purple));
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--cyber-purple), var(--cyber-pink));
+        }
+
+        /* Hover effects */
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-8px);
+        }
+
+        /* Pulse animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Grid pattern overlay */
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+    <div class="animated-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, createContext, useContext } = React;
+
+        // Mock data
+        const MOCK_PRODUCTS = [
+            {
+                id: '1',
+                name: 'Cyber Headphones X1',
+                slug: 'cyber-headphones-x1',
+                price: 299.99,
+                compareAtPrice: 399.99,
+                image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
+                category: 'Electronics',
+                stock: 50,
+                rating: 4.8,
+                description: 'Premium noise-cancelling headphones with AI-powered sound enhancement',
+                shortDesc: 'Studio-quality sound'
+            },
+            {
+                id: '2',
+                name: 'Neural Smartwatch Pro',
+                slug: 'neural-smartwatch-pro',
+                price: 499.99,
+                compareAtPrice: 599.99,
+                image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
+                category: 'Wearables',
+                stock: 30,
+                rating: 4.9,
+                description: 'Next-gen smartwatch with neural interface and health monitoring',
+                shortDesc: 'Advanced biometrics'
+            },
+            {
+                id: '3',
+                name: 'Quantum Gaming Keyboard',
+                slug: 'quantum-gaming-keyboard',
+                price: 199.99,
+                compareAtPrice: 249.99,
+                image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500',
+                category: 'Gaming',
+                stock: 100,
+                rating: 4.7,
+                description: 'Mechanical keyboard with RGB lighting and quantum actuation',
+                shortDesc: 'Lightning-fast response'
+            },
+            {
+                id: '4',
+                name: 'Holographic AR Glasses',
+                slug: 'holographic-ar-glasses',
+                price: 899.99,
+                compareAtPrice: 1199.99,
+                image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500',
+                category: 'AR/VR',
+                stock: 15,
+                rating: 5.0,
+                description: 'Advanced AR glasses with holographic display and spatial computing',
+                shortDesc: 'See the future'
+            },
+            {
+                id: '5',
+                name: 'Plasma Gaming Mouse',
+                slug: 'plasma-gaming-mouse',
+                price: 149.99,
+                compareAtPrice: 199.99,
+                image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?w=500',
+                category: 'Gaming',
+                stock: 75,
+                rating: 4.6,
+                description: 'Ultra-precise gaming mouse with customizable RGB and macro buttons',
+                shortDesc: 'Precision gaming'
+            },
+            {
+                id: '6',
+                name: 'Neon Wireless Earbuds',
+                slug: 'neon-wireless-earbuds',
+                price: 179.99,
+                compareAtPrice: 229.99,
+                image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500',
+                category: 'Audio',
+                stock: 60,
+                rating: 4.5,
+                description: 'True wireless earbuds with adaptive noise cancellation',
+                shortDesc: 'Pure wireless freedom'
+            }
+        ];
+
+        const MOCK_USERS = {
+            customer: { email: 'customer@test.com', password: 'password', role: 'CUSTOMER', name: 'John Doe' },
+            admin: { email: 'admin@test.com', password: 'admin123', role: 'ADMIN', name: 'Admin User' }
+        };
+
+        // Context
+        const AppContext = createContext();
+
+        const AppProvider = ({ children }) => {
+            const [user, setUser] = useState(null);
+            const [cart, setCart] = useState([]);
+            const [orders, setOrders] = useState([]);
+            const [view, setView] = useState('login'); // login, signup, products, cart, checkout, orders, admin
+
+            // Load from localStorage
+            useEffect(() => {
+                const savedUser = localStorage.getItem('user');
+                const savedCart = localStorage.getItem('cart');
+                const savedOrders = localStorage.getItem('orders');
+                
+                if (savedUser) setUser(JSON.parse(savedUser));
+                if (savedCart) setCart(JSON.parse(savedCart));
+                if (savedOrders) setOrders(JSON.parse(savedOrders));
+            }, []);
+
+            // Save to localStorage
+            useEffect(() => {
+                if (user) localStorage.setItem('user', JSON.stringify(user));
+                else localStorage.removeItem('user');
+            }, [user]);
+
+            useEffect(() => {
+                localStorage.setItem('cart', JSON.stringify(cart));
+            }, [cart]);
+
+            useEffect(() => {
+                localStorage.setItem('orders', JSON.stringify(orders));
+            }, [orders]);
+
+            const login = (email, password) => {
+                const foundUser = Object.values(MOCK_USERS).find(
+                    u => u.email === email && u.password === password
+                );
+                if (foundUser) {
+                    setUser(foundUser);
+                    setView(foundUser.role === 'ADMIN' ? 'admin' : 'products');
+                    return true;
+                }
+                return false;
+            };
+
+            const signup = (email, password, name) => {
+                const newUser = { email, password, role: 'CUSTOMER', name };
+                setUser(newUser);
+                setView('products');
+            };
+
+            const logout = () => {
+                setUser(null);
+                setCart([]);
+                setView('login');
+            };
+
+            const addToCart = (product) => {
+                const existing = cart.find(item => item.id === product.id);
+                if (existing) {
+                    setCart(cart.map(item =>
+                        item.id === product.id
+                            ? { ...item, quantity: item.quantity + 1 }
+                            : item
+                    ));
+                } else {
+                    setCart([...cart, { ...product, quantity: 1 }]);
+                }
+            };
+
+            const removeFromCart = (productId) => {
+                setCart(cart.filter(item => item.id !== productId));
+            };
+
+            const updateQuantity = (productId, quantity) => {
+                if (quantity === 0) {
+                    removeFromCart(productId);
+                } else {
+                    setCart(cart.map(item =>
+                        item.id === productId ? { ...item, quantity } : item
+                    ));
+                }
+            };
+
+            const placeOrder = (shippingInfo) => {
+                const order = {
+                    id: Date.now().toString(),
+                    orderNumber: `ORD-${Date.now()}`,
+                    items: cart,
+                    total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                    subtotal: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                    tax: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 0.1,
+                    shipping: 9.99,
+                    status: 'PLACED',
+                    paymentStatus: 'PAID',
+                    createdAt: new Date().toISOString(),
+                    shippingInfo
+                };
+                setOrders([order, ...orders]);
+                setCart([]);
+                return order;
+            };
+
+            const updateOrderStatus = (orderId, status) => {
+                setOrders(orders.map(order =>
+                    order.id === orderId ? { ...order, status } : order
+                ));
+            };
+
+            const value = {
+                user,
+                cart,
+                orders,
+                view,
+                setView,
+                login,
+                signup,
+                logout,
+                addToCart,
+                removeFromCart,
+                updateQuantity,
+                placeOrder,
+                updateOrderStatus
+            };
+
+            return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+        };
+
+        const useApp = () => useContext(AppContext);
+
+        // Components
+        const LoginPage = () => {
+            const { login, setView } = useApp();
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (login(email, password)) {
+                    setError('');
+                } else {
+                    setError('Invalid credentials');
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
+                    <div className="glass rounded-2xl p-8 max-w-md w-full">
+                        <h1 className="text-4xl font-display font-bold text-center mb-2">
+                            <span className="bg-gradient-to-r from-[#00f0ff] to-[#b000ff] bg-clip-text text-transparent">
+                                PROTECH
+                            </span>
+                        </h1>
+                        <p className="text-center text-gray-400 mb-8">Welcome back to Protech!</p>
+                        
+                        {error && (
+                            <div className="bg-red-500/20 border border-red-500 rounded-lg p-3 mb-4 text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm mb-2 text-gray-300">Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00f0ff] transition"
+                                    placeholder="your@email.com"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm mb-2 text-gray-300">Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00f0ff] transition"
+                                    placeholder="••••••••"
+                                    required
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-gradient-to-r from-[#00f0ff] to-[#b000ff] text-black font-bold py-3 rounded-lg hover:opacity-90 transition glow-blue"
+                            >
+                                LOGIN
+                            </button>
+                        </form>
+
+                        <div className="mt-6 text-center">
+                            <button
+                                onClick={() => setView('signup')}
+                                className="text-[#00f0ff] hover:underline text-sm"
+                            >
+                                Create Account
+                            </button>
+                        </div>
+
+                        <div className="mt-6 p-4 bg-white/5 rounded-lg">
+                            <p className="text-xs text-gray-400 mb-2">Test Accounts:</p>
+                            <p className="text-xs text-gray-300">Customer: customer@test.com / password</p>
+                            <p className="text-xs text-gray-300">Admin: admin@test.com / admin123</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SignupPage = () => {
+            const { signup, setView } = useApp();
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [name, setName] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                signup(email, password, name);
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
+                    <div className="glass rounded-2xl p-8 max-w-md w-full">
+                        <h1 className="text-4xl font-display font-bold text-center mb-2">
+                            <span className="bg-gradient-to-r from-[#b000ff] to-[#ff00ff] bg-clip-text text-transparent">
+                                JOIN US
+                            </span>
+                        </h1>
+                        <p className="text-center text-gray-400 mb-8">Enter the ProTech marketplace</p>
+                        
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm mb-2 text-gray-300">Name</label>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-[#b000ff] transition"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm mb-2 text-gray-300">Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-[#b000ff] transition"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm mb-2 text-gray-300">Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-[#b000ff] transition"
+                                    required
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-gradient-to-r from-[#b000ff] to-[#ff00ff] text-white font-bold py-3 rounded-lg hover:opacity-90 transition glow-purple"
+                            >
+                                CREATE ACCOUNT
+                            </button>
+                        </form>
+
+                        <div className="mt-6 text-center">
+                            <button
+                                onClick={() => setView('login')}
+                                className="text-[#b000ff] hover:underline text-sm"
+                            >
+                                Back to Login
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ProductsPage = () => {
+            const { addToCart, cart, setView, user } = useApp();
+            const [searchTerm, setSearchTerm] = useState('');
+
+            const filteredProducts = MOCK_PRODUCTS.filter(p =>
+                p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.category.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            return (
+                <div className="min-h-screen relative z-10">
+                    {/* Header */}
+                    <nav className="glass border-b border-white/10 sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+                            <h1 className="text-2xl font-display font-bold">
+                                <span className="bg-gradient-to-r from-[#00f0ff] to-[#b000ff] bg-clip-text text-transparent">
+                                    PROTECH
+                                </span>
+                            </h1>
+                            <div className="flex items-center gap-4">
+                                <span className="text-sm text-gray-400">Hello, {user?.name}</span>
+                                <button
+                                    onClick={() => setView('orders')}
+                                    className="px-4 py-2 glass rounded-lg hover:bg-white/10 transition text-sm"
+                                >
+                                    Orders
+                                </button>
+                                <button
+                                    onClick={() => setView('cart')}
+                                    className="relative px-4 py-2 bg-gradient-to-r from-[#00f0ff] to-[#b000ff] text-black rounded-lg font-bold hover:opacity-90 transition"
+                                >
+                                    Cart
+                                    {cartCount > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-[#ff00ff] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Hero */}
+                    <div className="max-w-7xl mx-auto px-4 py-12">
+                        <div className="text-center mb-12">
+                            <h2 className="text-6xl font-display font-bold mb-4">
+                                <span className="bg-gradient-to-r from-[#00f0ff] via-[#b000ff] to-[#ff00ff] bg-clip-text text-transparent">
+                                    PROTECH
+                                </span>
+                            </h2>
+                            <p className="text-xl text-gray-400">ProTech Sounds & Lights</p>
+                        </div>
+
+                        {/* Search */}
+                        <div className="max-w-2xl mx-auto mb-12">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search products..."
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-[#00f0ff] transition"
+                            />
+                        </div>
+
+                        {/* Products Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredProducts.map(product => (
+                                <div key={product.id} className="glass rounded-xl overflow-hidden hover-lift group">
+                                    <div className="relative overflow-hidden">
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="w-full h-64 object-cover group-hover:scale-110 transition duration-500"
+                                        />
+                                        {product.compareAtPrice && (
+                                            <div className="absolute top-4 right-4 bg-[#ff00ff] text-white px-3 py-1 rounded-full text-sm font-bold">
+                                                SALE
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="p-6">
+                                        <div className="text-sm text-[#00f0ff] mb-2">{product.category}</div>
+                                        <h3 className="text-xl font-bold mb-2">{product.name}</h3>
+                                        <p className="text-gray-400 text-sm mb-4">{product.shortDesc}</p>
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div>
+                                                <span className="text-2xl font-bold">${product.price}</span>
+                                                {product.compareAtPrice && (
+                                                    <span className="text-gray-500 line-through ml-2">${product.compareAtPrice}</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-[#00ff88]">★</span>
+                                                <span className="text-sm">{product.rating}</span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => addToCart(product)}
+                                            className="w-full bg-gradient-to-r from-[#00f0ff] to-[#b000ff] text-black font-bold py-3 rounded-lg hover:opacity-90 transition"
+                                        >
+                                            ADD TO CART
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const CartPage = () => {
+            const { cart, setView, updateQuantity, removeFromCart } = useApp();
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.1;
+            const shipping = cart.length > 0 ? 9.99 : 0;
+            const total = subtotal + tax + shipping;
+
+            if (cart.length === 0) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
+                        <div className="text-center">
+                            <h2 className="text-4xl font-display font-bold mb-4">Your cart is empty</h2>
+                            <button
+                                onClick={() => setView('products')}
+                                className="px-8 py-3 bg-gradient-to-r from-[#00f0ff] to-[#b000ff] text-black font-bold rounded-lg"
+                            >
+                                START SHOPPING
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen relative z-10 p-4">
+                    <div className="max-w-6xl mx-auto py-8">
+                        <div className="flex items-center justify-between mb-8">
+                            <h1 className="text-4xl font-display font-bold">YOUR CART</h1>
+                            <button
+                                onClick={() => setView('products')}
+                                className="px-4 py-2 glass rounded-lg hover:bg-white/10 transition"
+                            >
+                                ← Back to Shop
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Cart Items */}
+                            <div className="lg:col-span-2 space-y-4">
+                                {cart.map(item => (
+                                    <div key={item.id} className="glass rounded-xl p-6 flex gap-4">
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className="w-24 h-24 object-cover rounded-lg"
+                                        />
+                                        <div className="flex-1">
+                                            <h3 className="font-bold text-lg mb-2">{item.name}</h3>
+                                            <p className="text-gray-400 text-sm mb-4">{item.category}</p>
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-2 glass rounded-lg">
+                                                    <button
+                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                        className="px-3 py-1 hover:bg-white/10"
+                                                    >
+                                                        -
+                                                    </button>
+                                                    <span className="px-3">{item.quantity}</span>
+                                                    <button
+                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                        className="px-3 py-1 hover:bg-white/10"
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
+                                                <span className="text-xl font-bold">${(item.price * item.quantity).toFixed(2)}</span>
+                                                <button
+                                                    onClick={() => removeFromCart(item.id)}
+                                                    className="ml-auto text-red-500 hover:text-red-400"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Order Summary */}
+                            <div className="glass rounded-xl p-6 h-fit sticky top-4">
+                                <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+                                <div className="space-y-3 mb-6">
+                                    <div className="flex justify-between text-gray-400">
+                                        <span>Subtotal</span>
+                                        <span>${subtotal.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-gray-400">
+                                        <span>Tax (10%)</span>
+                                        <span>${tax.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-gray-400">
+                                        <span>Shipping</span>
+                                        <span>${shipping.toFixed(2)}</span>
+                                    </div>
+                                    <div className="border-t border-white/10 pt-3">
+                                        <div className="flex justify-between text-xl font-bold">
+                                            <span>Total</span>
+                                            <span className="text-[#00f0ff]">${total.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setView('checkout')}
+                                    className="w-full bg-gradient-to-r from-[#00f0ff] to-[#b000ff] text-black font-bold py-4 rounded-lg hover:opacity-90 transition glow-blue"
+                                >
+                                    PROCEED TO CHECKOUT
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const CheckoutPage = () => {
+            const { cart, placeOrder, setView } = useApp();
+            const [shippingInfo, setShippingInfo] = useState({
+                name: '',
+                email: '',
+                address: '',
+                city: '',
+                state: '',
+                zip: ''
+            });
+            const [processing, setProcessing] = useState(false);
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.1;
+            const shipping = 9.99;
+            const total = subtotal + tax + shipping;
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                setProcessing(true);
+                
+                // Simulate payment processing
+                setTimeout(() => {
+                    const order = placeOrder(shippingInfo);
+                    setProcessing(false);
+                    alert(`Order placed successfully! Order #${order.orderNumber}`);
+                    setView('orders');
+                }, 2000);
+            };
+
+            return (
+                <div className="min-h-screen relative z-10 p-4">
+                    <div className="max-w-4xl mx-auto py-8">
+                        <h1 className="text-4xl font-display font-bold mb-8">CHECKOUT</h1>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Shipping Form */}
+                            <div className="glass rounded-xl p-6">
+                                <h2 className="text-xl font-bold mb-6">Shipping Information</h2>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm mb-2">Name</label>
+                                        <input
+                                            type="text"
+                                            value={shippingInfo.name}
+                                            onChange={(e) => setShippingInfo({...shippingInfo, name: e.target.value})}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm mb-2">Email</label>
+                                        <input
+                                            type="email"
+                                            value={shippingInfo.email}
+                                            onChange={(e) => setShippingInfo({...shippingInfo, email: e.target.value})}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm mb-2">Address</label>
+                                        <input
+                                            type="text"
+                                            value={shippingInfo.address}
+                                            onChange={(e) => setShippingInfo({...shippingInfo, address: e.target.value})}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm mb-2">City</label>
+                                            <input
+                                                type="text"
+                                                value={shippingInfo.city}
+                                                onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
+                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm mb-2">State</label>
+                                            <input
+                                                type="text"
+                                                value={shippingInfo.state}
+                                                onChange={(e) => setShippingInfo({...shippingInfo, state: e.target.value})}
+                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm mb-2">ZIP</label>
+                                            <input
+                                                type="text"
+                                                value={shippingInfo.zip}
+                                                onChange={(e) => setShippingInfo({...shippingInfo, zip: e.target.value})}
+                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-4">
+                                        <h3 className="text-lg font-bold mb-4">Payment Method</h3>
+                                        <div className="glass rounded-lg p-4 mb-4">
+                                            <p className="text-sm text-gray-400">Test Card Number</p>
+                                            <p className="font-mono">4242 4242 4242 4242</p>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Card Number"
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 mb-2"
+                                            defaultValue="4242 4242 4242 4242"
+                                            required
+                                        />
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <input
+                                                type="text"
+                                                placeholder="MM/YY"
+                                                className="bg-white/5 border border-white/10 rounded-lg px-4 py-2"
+                                                defaultValue="12/25"
+                                                required
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="CVC"
+                                                className="bg-white/5 border border-white/10 rounded-lg px-4 py-2"
+                                                defaultValue="123"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="w-full bg-gradient-to-r from-[#00f0ff] to-[#b000ff] text-black font-bold py-4 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+                                    >
+                                        {processing ? 'PROCESSING...' : `PAY $${total.toFixed(2)}`}
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Order Summary */}
+                            <div>
+                                <div className="glass rounded-xl p-6 mb-4">
+                                    <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+                                    <div className="space-y-2 mb-4">
+                                        {cart.map(item => (
+                                            <div key={item.id} className="flex justify-between text-sm">
+                                                <span>{item.name} x{item.quantity}</span>
+                                                <span>${(item.price * item.quantity).toFixed(2)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="border-t border-white/10 pt-4 space-y-2">
+                                        <div className="flex justify-between text-gray-400">
+                                            <span>Subtotal</span>
+                                            <span>${subtotal.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-gray-400">
+                                            <span>Tax</span>
+                                            <span>${tax.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-gray-400">
+                                            <span>Shipping</span>
+                                            <span>${shipping.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xl font-bold border-t border-white/10 pt-2">
+                                            <span>Total</span>
+                                            <span className="text-[#00f0ff]">${total.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const OrdersPage = () => {
+            const { orders, setView, user } = useApp();
+
+            if (orders.length === 0) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
+                        <div className="text-center">
+                            <h2 className="text-4xl font-display font-bold mb-4">No orders yet</h2>
+                            <button
+                                onClick={() => setView('products')}
+                                className="px-8 py-3 bg-gradient-to-r from-[#00f0ff] to-[#b000ff] text-black font-bold rounded-lg"
+                            >
+                                START SHOPPING
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen relative z-10 p-4">
+                    <div className="max-w-6xl mx-auto py-8">
+                        <div className="flex items-center justify-between mb-8">
+                            <h1 className="text-4xl font-display font-bold">ORDER HISTORY</h1>
+                            <button
+                                onClick={() => setView('products')}
+                                className="px-4 py-2 glass rounded-lg hover:bg-white/10 transition"
+                            >
+                                ← Back to Shop
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {orders.map(order => (
+                                <div key={order.id} className="glass rounded-xl p-6">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div>
+                                            <h3 className="text-xl font-bold mb-2">Order #{order.orderNumber}</h3>
+                                            <p className="text-gray-400 text-sm">
+                                                {new Date(order.createdAt).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="px-4 py-2 bg-[#00ff88]/20 text-[#00ff88] rounded-full text-sm font-bold mb-2">
+                                                {order.status}
+                                            </div>
+                                            <div className="text-2xl font-bold">${order.total.toFixed(2)}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {order.items.map(item => (
+                                            <div key={item.id} className="flex items-center gap-4 p-3 bg-white/5 rounded-lg">
+                                                <img
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    className="w-16 h-16 object-cover rounded"
+                                                />
+                                                <div className="flex-1">
+                                                    <p className="font-bold">{item.name}</p>
+                                                    <p className="text-sm text-gray-400">Qty: {item.quantity}</p>
+                                                </div>
+                                                <div className="font-bold">${(item.price * item.quantity).toFixed(2)}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="mt-4 flex gap-3">
+                                        <button className="px-4 py-2 glass rounded-lg hover:bg-white/10 transition text-sm">
+                                            Track Order
+                                        </button>
+                                        <button className="px-4 py-2 glass rounded-lg hover:bg-white/10 transition text-sm">
+                                            Download Invoice
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminDashboard = () => {
+            const { orders, logout, setView, updateOrderStatus } = useApp();
+
+            const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+            const totalOrders = orders.length;
+
+            const statusOptions = ['PLACED', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+
+            return (
+                <div className="min-h-screen relative z-10 p-4">
+                    <div className="max-w-7xl mx-auto py-8">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-8">
+                            <h1 className="text-4xl font-display font-bold">
+                                <span className="bg-gradient-to-r from-[#00f0ff] to-[#b000ff] bg-clip-text text-transparent">
+                                    ADMIN DASHBOARD
+                                </span>
+                            </h1>
+                            <button
+                                onClick={logout}
+                                className="px-4 py-2 glass rounded-lg hover:bg-white/10 transition"
+                            >
+                                Logout
+                            </button>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                            <div className="glass rounded-xl p-6">
+                                <div className="text-sm text-gray-400 mb-2">Total Orders</div>
+                                <div className="text-3xl font-bold text-[#00f0ff]">{totalOrders}</div>
+                            </div>
+                            <div className="glass rounded-xl p-6">
+                                <div className="text-sm text-gray-400 mb-2">Total Revenue</div>
+                                <div className="text-3xl font-bold text-[#00ff88]">${totalRevenue.toFixed(2)}</div>
+                            </div>
+                            <div className="glass rounded-xl p-6">
+                                <div className="text-sm text-gray-400 mb-2">Avg Order Value</div>
+                                <div className="text-3xl font-bold text-[#b000ff]">
+                                    ${totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : '0.00'}
+                                </div>
+                            </div>
+                            <div className="glass rounded-xl p-6">
+                                <div className="text-sm text-gray-400 mb-2">Products</div>
+                                <div className="text-3xl font-bold text-[#ff00ff]">{MOCK_PRODUCTS.length}</div>
+                            </div>
+                        </div>
+
+                        {/* Orders Management */}
+                        <div className="glass rounded-xl p-6">
+                            <h2 className="text-2xl font-bold mb-6">Order Management</h2>
+                            
+                            {orders.length === 0 ? (
+                                <p className="text-center text-gray-400 py-8">No orders yet</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {orders.map(order => (
+                                        <div key={order.id} className="bg-white/5 rounded-lg p-4">
+                                            <div className="flex items-start justify-between mb-3">
+                                                <div>
+                                                    <div className="font-bold text-lg">#{order.orderNumber}</div>
+                                                    <div className="text-sm text-gray-400">
+                                                        {new Date(order.createdAt).toLocaleString()}
+                                                    </div>
+                                                    <div className="text-sm text-gray-400 mt-1">
+                                                        Customer: {order.shippingInfo?.name || 'N/A'}
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-xl font-bold mb-2">${order.total.toFixed(2)}</div>
+                                                    <select
+                                                        value={order.status}
+                                                        onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                                        className="bg-white/10 border border-white/20 rounded px-3 py-1 text-sm"
+                                                    >
+                                                        {statusOptions.map(status => (
+                                                            <option key={status} value={status} className="bg-[#1a0f2e]">
+                                                                {status}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="text-sm text-gray-400">
+                                                {order.items.length} items • {order.paymentStatus}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Products Quick View */}
+                        <div className="glass rounded-xl p-6 mt-6">
+                            <h2 className="text-2xl font-bold mb-6">Products</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {MOCK_PRODUCTS.slice(0, 6).map(product => (
+                                    <div key={product.id} className="bg-white/5 rounded-lg p-4 flex gap-3">
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="w-16 h-16 object-cover rounded"
+                                        />
+                                        <div className="flex-1">
+                                            <div className="font-bold text-sm mb-1">{product.name}</div>
+                                            <div className="text-xs text-gray-400">Stock: {product.stock}</div>
+                                            <div className="text-sm font-bold mt-1">${product.price}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App
+        const App = () => {
+            const { view, user } = useApp();
+
+            return (
+                <div className="grid-pattern">
+                    {view === 'login' && <LoginPage />}
+                    {view === 'signup' && <SignupPage />}
+                    {view === 'products' && <ProductsPage />}
+                    {view === 'cart' && <CartPage />}
+                    {view === 'checkout' && <CheckoutPage />}
+                    {view === 'orders' && <OrdersPage />}
+                    {view === 'admin' && <AdminDashboard />}
+                </div>
+            );
+        };
+
+        // Render
+        ReactDOM.render(
+            <AppProvider>
+                <App />
+            </AppProvider>,
+            document.getElementById('root')
+        );
+    </script>
+</body>
+</html>
